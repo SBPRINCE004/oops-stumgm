@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Management System | Java OOP Project</title>
+<style>
+:root{--navy:#0b1f3a;--blue:#087ceb;--cyan:#22c3e6;--pale:#e8f2ff;--ink:#15191f;--muted:#46617d;--line:#c9d9ea;--green:#14866d;--amber:#b86b08;--red:#a83b43}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:#f4f8ff;color:var(--navy);font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+#stage{position:fixed;inset:0;display:grid;place-items:center;isolation:isolate;overflow:hidden}
+#stage::before{content:"";position:absolute;inset:-35%;z-index:-1;background:radial-gradient(ellipse at 18% 22%,rgba(34,195,230,.38),transparent 32%),radial-gradient(ellipse at 78% 70%,rgba(8,124,235,.27),transparent 38%),radial-gradient(ellipse at 55% 8%,rgba(255,255,255,.95),transparent 46%);background-size:130% 130%;animation:fieldDrift 24s ease-in-out infinite alternate;will-change:background-position}
+#deck{position:relative;isolation:isolate;width:min(100vw,177.78vh);aspect-ratio:16/9;container-type:size;font-size:clamp(12px,2.4vh,26px);overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.97) 0%,rgba(232,242,255,.94) 100%);box-shadow:0 1.5em 4em rgba(11,31,58,.18)}
+#deck::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.15;background-image:linear-gradient(rgba(8,124,235,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(8,124,235,.16) 1px,transparent 1px);background-size:4.6em 4.6em;mask-image:radial-gradient(ellipse at center,#000 12%,transparent 82%);animation:gridDrift 34s linear infinite}
+#deck::after{content:"";position:absolute;z-index:1;pointer-events:none;top:-30%;bottom:-30%;left:-45%;width:28%;transform:skewX(-18deg);opacity:.12;background:linear-gradient(90deg,transparent,rgba(34,195,230,.8),rgba(255,255,255,.85),transparent);animation:lightSweep 19s ease-in-out infinite}
+.orb{position:absolute;z-index:0;width:36em;height:36em;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(34,195,230,.29),rgba(8,124,235,.13) 55%,transparent 72%);filter:blur(6px);transition:transform 1.4s cubic-bezier(.65,0,.35,1);pointer-events:none;animation:orbFloat 16s ease-in-out infinite alternate;will-change:transform}
+.orb.secondary{width:25em;height:25em;right:-7em;bottom:-9em;opacity:.65;background:radial-gradient(circle at 45% 40%,rgba(8,124,235,.24),rgba(34,195,230,.1) 60%,transparent 75%);animation-duration:21s;animation-direction:alternate-reverse}
+.particle{position:absolute;z-index:0;left:var(--x);top:var(--y);width:var(--size);height:var(--size);border:1px solid rgba(8,124,235,.35);border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 1.2em rgba(34,195,230,.35);pointer-events:none;animation:particleDrift var(--duration) ease-in-out var(--delay) infinite alternate;will-change:transform,opacity}
+.s{position:absolute;z-index:2;inset:0;padding:3.35em 4.3em 2.9em;opacity:0;visibility:hidden;transform:scale(1.025);transition:opacity .5s ease,transform .72s cubic-bezier(.2,.7,.2,1),visibility 0s .5s;overflow:auto;scrollbar-width:none;overscroll-behavior:contain}
+.s::-webkit-scrollbar{display:none}
+.s.active{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.s.active.motion-zoom{animation:cinemaZoom .82s cubic-bezier(.16,.8,.24,1) both}
+.s.active.motion-left{animation:revealLeft .72s cubic-bezier(.2,.8,.2,1) both}
+.s.active.motion-up{animation:revealUp .72s cubic-bezier(.2,.8,.2,1) both}
+.s.active.motion-depth{animation:depthReveal .86s cubic-bezier(.2,.72,.2,1) both}
+.s.active.motion-section{animation:sectionReveal .9s cubic-bezier(.16,.82,.24,1) both}
+.s.active.motion-shot{animation:shotReveal .82s cubic-bezier(.16,.82,.24,1) both}
+.r{opacity:0;transform:translateY(1em)}
+.active .r{animation:rise .65s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0)*.08s + .12s)}
+.active .glass.r{animation-name:cardSpring}
+.screenshot-slide.active .shot-image{animation:shotImageIn .95s cubic-bezier(.16,.82,.24,1) both}
+@keyframes rise{to{opacity:1;transform:none}}
+@keyframes cardSpring{0%{opacity:0;transform:translateY(1em) scale(.96)}72%{opacity:1;transform:translateY(-.08em) scale(1.012)}100%{opacity:1;transform:none}}
+@keyframes cinemaZoom{from{opacity:0;transform:scale(1.065)}to{opacity:1;transform:none}}
+@keyframes revealLeft{from{opacity:0;transform:translateX(5%) scale(.99)}to{opacity:1;transform:none}}
+@keyframes revealUp{from{opacity:0;transform:translateY(4%) scale(.99)}to{opacity:1;transform:none}}
+@keyframes depthReveal{from{opacity:0;transform:perspective(1600px) rotateY(4deg) translateX(2%) scale(.985)}to{opacity:1;transform:none}}
+@keyframes sectionReveal{0%{opacity:0;transform:scale(.94) translateY(.02em);filter:blur(3px)}70%{opacity:1;transform:scale(1.008);filter:none}100%{opacity:1;transform:none;filter:none}}
+@keyframes shotReveal{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes shotImageIn{from{opacity:.45;transform:scale(1.035)}to{opacity:1;transform:none}}
+@keyframes fieldDrift{0%{background-position:0% 0%}100%{background-position:100% 80%}}
+@keyframes gridDrift{to{background-position:4.6em 4.6em,4.6em 4.6em}}
+@keyframes lightSweep{0%,32%{transform:translateX(0) skewX(-18deg)}70%,100%{transform:translateX(570%) skewX(-18deg)}}
+@keyframes orbFloat{from{translate:-.8em -.4em}to{translate:1.3em 1em}}
+@keyframes particleDrift{from{transform:translate3d(0,0,0);opacity:.35}to{transform:translate3d(1.1em,-1.6em,0);opacity:.85}}
+h1{font-size:3.4em;line-height:1.04;letter-spacing:0}
+h2{font-size:1.8em;line-height:1.12;letter-spacing:0;margin-bottom:.48em}
+h2 small{display:block;font-size:.42em;color:var(--blue);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.45em;font-weight:750}
+p{line-height:1.4}
+.sub{font-size:1.32em;color:#176da7;margin-top:.55em;max-width:37em}
+.eyebrow{display:inline-block;color:var(--blue);background:#e3f5fb;border-left:.24em solid var(--cyan);padding:.32em .7em;font-size:.82em;font-weight:700;text-transform:uppercase;margin-bottom:.75em}
+.glass{background:rgba(255,255,255,.86);border:1px solid rgba(8,124,235,.19);border-radius:.35em;box-shadow:0 .6em 1.5em rgba(11,31,58,.08);padding:1em 1.2em}
+.grid{display:grid;gap:.85em}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.glass b{display:block;font-size:1.12em;margin-bottom:.25em}
+.glass p,.glass span{font-size:.9em;color:#38536f;line-height:1.38}
+.glass .eyebrow{margin-bottom:.45em}
+.tag{display:inline-block;font-size:.82em;font-weight:700;color:var(--blue);background:#e5f4ff;padding:.22em .6em;border-radius:2em;margin-bottom:.45em}
+.tag.good{color:#116a56;background:#e5f6f0}.tag.plan{color:#8a5108;background:#fff3dc}.tag.warn{color:#8f313a;background:#fff0ef}
+.flow{display:flex;align-items:stretch;gap:.6em}.flow .glass{flex:1;min-width:0;text-align:center;padding:1em .8em}
+.arr{align-self:center;flex:0 0 auto;font-size:1.7em;color:var(--blue);font-weight:700}
+.code{background:#0b1f3a;color:#d8ebff;border-left:.3em solid var(--cyan);border-radius:.35em;padding:.78em .92em;font: .82em/1.34 Consolas,"SFMono-Regular",monospace;white-space:pre-wrap;overflow:auto;max-height:24em;overflow-wrap:anywhere}
+.kw{color:#5be0ee}.type{color:#8fc3ff}.str{color:#a9e6bc}.cm{color:#a7b9cd}.num{color:#ffd27a}
+.code-label{font-size:.76em;color:#c4ddf8;margin-bottom:.45em;text-transform:uppercase;font-weight:700;letter-spacing:.06em}
+.note{font-size:.86em;color:#5b7189;margin-top:.7em;line-height:1.4}
+.pill{display:inline-block;border:1px solid var(--line);padding:.3em .7em;border-radius:2em;color:#38536f;font-size:.76em;font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1em}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75em}
+.bullets{padding-left:1.15em;color:#38536f;font-size:.88em;line-height:1.45}.bullets li{margin:.28em 0}
+.label{font-size:.7em;color:var(--blue);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.35em}
+.callout{border-left:.25em solid var(--cyan);background:rgba(34,195,230,.09);padding:.65em .85em;color:#294765;font-size:.84em;line-height:1.4}
+.flow .step{position:relative}
+.step strong{display:block;color:var(--blue);font-size:.72em;letter-spacing:.08em;margin-bottom:.35em}
+.diagram{display:grid;grid-template-columns:1.2fr 1.2fr 1fr;gap:.7em}
+.diagram section{padding:.75em;border:1px solid var(--line);background:rgba(255,255,255,.7);border-radius:.35em}
+.diagram h3{font-size:.78em;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6em}
+.classbox{background:#fff;border:1px solid #9fbada;border-left:.22em solid var(--blue);padding:.45em .55em;margin:.35em 0;font-size:.78em;line-height:1.25}
+.classbox b{display:inline;color:var(--navy);font-size:1em}
+.classbox small{display:block;color:var(--muted);font-size:.83em;margin-top:.18em}
+.relation{text-align:center;color:var(--blue);font-size:.72em;padding:.12em}
+.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65em}
+.capture{min-width:0}
+.capture figure{aspect-ratio:16/9;background:#13243b;border:1px solid #9bb4d2;border-radius:.28em;overflow:hidden;display:grid;place-items:center}
+.capture img{display:block;width:100%;height:100%;object-fit:contain}
+.capture figcaption{font-size:.72em;font-weight:700;color:#25415e;margin-top:.28em}
+.capture .source{font-size:.62em;color:#60758c;margin-top:.08em}
+table{width:100%;border-collapse:collapse;font-size:.76em;background:rgba(255,255,255,.88);border:1px solid var(--line)}
+th,td{text-align:left;vertical-align:top;padding:.42em .55em;border-bottom:1px solid #d5e1ee;line-height:1.3}
+th{background:#eaf3fc;color:#153b62;font-weight:700}
+td{color:#35516e}
+.status{font-weight:700;white-space:nowrap}
+.status.pass{color:var(--green)}.status.observe{color:var(--amber)}
+.team-list{display:grid;grid-template-columns:repeat(2,max-content);gap:.35em 1.2em;font-size:1em;font-weight:650;margin-top:1.6em}
+.s[data-key="title"] .sub{max-width:28em}
+.hint{position:absolute;top:1em;right:1.4em;font-size:.76em;color:#5e7894;z-index:8}
+.dark-slide .hint,.dark-slide #counter{color:#c8def3}
+#progress{position:absolute;z-index:7;top:0;left:0;width:100%;height:.18em;background:rgba(8,124,235,.1)}
+#progress i{display:block;width:100%;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transform:scaleX(0);transform-origin:left center;transition:transform .42s cubic-bezier(.2,.7,.2,1)}
+#counter{position:absolute;right:1.5em;bottom:1.35em;font-size:.72em;color:#5e7894;z-index:6;font-variant-numeric:tabular-nums}
+#dots{position:absolute;bottom:1.45em;left:50%;transform:translateX(-50%);display:flex;gap:.25em;z-index:7;max-width:82%;overflow:auto;padding:.2em;scrollbar-width:none}
+#dots::-webkit-scrollbar{display:none}
+#dots button{flex:0 0 .58em;width:.58em;height:.58em;border:0;border-radius:50%;padding:0;background:#a9c4df;cursor:pointer;transition:width .25s,background .25s}
+#dots button.on{width:1.45em;border-radius:1em;background:var(--blue)}
+#dots button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+#notes{position:absolute;left:0;right:0;bottom:0;max-height:38%;overflow:auto;background:rgba(11,31,58,.97);color:#eff7ff;font-size:.9em;line-height:1.45;padding:1em 2.5em 2.5em;transform:translateY(105%);transition:transform .4s;z-index:9}
+#notes.show{transform:translateY(0)}
+#notes strong{display:block;color:var(--cyan);font-size:.78em;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3em}
+#notes span{display:block;color:#e3effb}
+.section-divider{display:grid;align-content:center;padding-left:9%;background:linear-gradient(112deg,rgba(11,31,58,.98),rgba(13,53,94,.96) 66%,rgba(8,124,235,.94));color:#f3f9ff}
+.section-divider::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 68%,rgba(34,195,230,.18)),radial-gradient(ellipse at 78% 48%,rgba(34,195,230,.22),transparent 44%)}
+.section-divider .section-number{font-size:.85em;color:var(--cyan);font-weight:750;text-transform:uppercase;margin-bottom:.8em}
+.section-divider h2{font-size:3em;max-width:13em;margin:0 0 .5em;color:#fff}
+.section-divider .range{font-size:1em;color:#c8def3}
+.section-divider .section-line{width:5em;height:.18em;background:var(--cyan);margin:1.3em 0;border-radius:2em}
+.screenshot-slide{padding:1.25em 3.5em 3.9em;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:.28em}
+.screenshot-slide h2{font-size:1.64em;line-height:1.08;margin:0}
+.shot-frame{min-height:0;width:100%;height:100%;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(34,195,230,.7);border-radius:.38em;background:linear-gradient(145deg,#07182d,#16375a);box-shadow:0 1em 2.5em rgba(11,31,58,.24),0 0 1.1em rgba(34,195,230,.18)}
+.shot-image{display:block;width:100%;height:100%;object-fit:contain;max-width:100%;max-height:100%}
+.shot-note{font-size:.82em;color:#38536f;line-height:1.25;min-height:1em}
+.s[data-key="code-walkthrough"] .code{font-size:.74em;line-height:1.2;padding:.55em .7em}
+.video-slide{padding:1.35em 3.7em 2.6em;display:grid;grid-template-rows:auto minmax(0,1fr);gap:.45em}
+.video-slide h2{font-size:1.65em;margin:0}
+.video-meta{display:block;margin-top:.15em;color:#5b7189;font-size:.48em;font-weight:600}
+.video-frame{position:relative;min-height:0;display:grid;place-items:center;overflow:hidden;border-radius:.45em;background:#07182d;border:1px solid rgba(34,195,230,.72);box-shadow:0 1em 3em rgba(11,31,58,.3)}
+.final-video{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;background:#07182d}
+.video-frame::after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 0 5em rgba(8,124,235,.16);animation:videoHalo 5s ease-in-out infinite alternate}
+@keyframes videoHalo{to{box-shadow:inset 0 0 7em rgba(34,195,230,.24)}}
+.video-play{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);padding:.85em 1.2em;border:1px solid rgba(255,255,255,.65);border-radius:.32em;background:rgba(8,124,235,.94);color:white;font:inherit;font-weight:750;box-shadow:0 .8em 2em rgba(0,0,0,.32);cursor:pointer}
+.video-play[hidden]{display:none}
+.video-mute{position:absolute;z-index:5;right:.8em;top:.8em;padding:.48em .8em;border:1px solid rgba(255,255,255,.48);border-radius:.28em;background:rgba(11,31,58,.9);color:white;font:inherit;font-size:.78em;font-weight:700;cursor:pointer}
+.video-intro{animation:videoTitleIn .85s cubic-bezier(.16,.82,.24,1) both}
+@keyframes videoTitleIn{from{opacity:0;transform:translateY(.5em) scale(.98)}to{opacity:1;transform:none}}
+@media (orientation:portrait){
+ #deck{font-size:clamp(10px,1.5vh,16px)}
+ .s{padding:2.3em 2.2em 3.5em}
+ h1{font-size:3.1em}
+ h2{font-size:1.7em}
+ .g4,.g3,.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .diagram{grid-template-columns:1fr}
+ .two{grid-template-columns:1fr}
+ .hint{font-size:.62em}
+ .screenshot-slide{padding:1.2em 1.2em 2.8em}
+ .video-slide{padding:1.25em 1.2em 2em}
+ .team-list{grid-template-columns:1fr}
+}
+@media (max-height:520px) and (orientation:landscape){
+ #deck{font-size:clamp(10px,2.9vh,16px)}
+ .s{padding:2em 3em 2.3em}
+ h2{font-size:1.9em}
+ .screenshot-slide{padding:1em 2.5em 3.1em}
+}
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+ #stage::before,#deck::before,#deck::after,.orb,.particle{animation:none!important}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+<main id="deck" aria-label="Java Student Management System presentation">
+<div class="orb" id="orb" aria-hidden="true"></div>
+<div class="orb secondary" aria-hidden="true"></div>
+<div id="particles" aria-hidden="true"></div>
+<div class="hint">&larr; &rarr; / Space / click &middot; N notes &middot; F fullscreen</div>
+<div id="progress" role="progressbar" aria-label="Presentation progress" aria-valuemin="1" aria-valuemax="37" aria-valuenow="1"><i></i></div>
+
+<section class="s active" id="title" data-key="title" data-presenter="Shifa" aria-label="Title and team" style="padding-top:7em">
+ <div class="eyebrow r" style="--i:0">Java OOP project &middot; team presentation</div>
+ <h1 class="r" style="--i:1">Student Management<br>System</h1>
+ <p class="sub r" style="--i:2">A Java Swing desktop application for student records, courses, marks, attendance, and reports.</p>
+ <div class="team-list r" style="--i:3"><span>1. Shifa <small>(Roll No: 18)</small></span><span>2. Sabeeh <small>(Roll No: 84)</small></span><span>3. Sahna <small>(Roll No: 49)</small></span><span>4. Malavika <small>(Roll No: 30)</small></span></div>
+ <div class="glass r" style="--i:4;position:absolute;right:5.2em;top:8.2em;width:22em">
+  <span class="tag">Project in one line</span><b>Input &rarr; Java objects &rarr; services &rarr; in-memory repositories</b>
+  <p>Built to make OOP ideas visible in a working desktop workflow.</p>
+ </div>
+</section>
+
+<section class="s" data-key="problem" data-presenter="Shifa" aria-label="Problem and objectives">
+ <h2 class="r"><small>02 &middot; Why this project</small>Make academic records easier to manage</h2>
+ <div class="grid g2">
+  <div class="glass r" style="--i:1"><span class="tag warn">Problem</span><b>Separate, manual records</b><p>Student details, marks, and attendance are easy to duplicate or calculate inconsistently when managed by hand.</p></div>
+  <div class="glass r" style="--i:2"><span class="tag good">Motivation</span><b>One practical desktop workflow</b><p>Connect common record tasks with reusable Java classes and clear separation between screens, logic, and storage.</p></div>
+ </div>
+ <div class="grid g3" style="margin-top:.9em">
+  <div class="glass r" style="--i:3"><div class="label">Objective 01</div><b>Organize records</b><p>Add, find, update, and remove students and courses.</p></div>
+  <div class="glass r" style="--i:4"><div class="label">Objective 02</div><b>Calculate results</b><p>Compute totals, grades, percentages, and attendance eligibility.</p></div>
+  <div class="glass r" style="--i:5"><div class="label">Intended operator</div><b>Academic staff demo user</b><p>The app provides an admin-style demo login; it has no student portal or role system.</p></div>
+ </div>
+</section>
+
+<section class="s" data-key="overview" data-presenter="Shifa" aria-label="Overview and scope">
+ <h2 class="r"><small>03 &middot; Overview and scope</small>A focused academic record manager</h2>
+ <div class="two">
+  <div class="glass r" style="--i:1">
+   <span class="tag good">Implemented</span><b>Included in this application</b>
+   <ul class="bullets"><li>Student and course CRUD screens</li><li>Marks entry and grade calculation</li><li>Attendance entry and 75% eligibility status</li><li>Dashboard counts and average attendance</li><li>Text-based student, marks, and attendance reports</li></ul>
+  </div>
+  <div class="glass r" style="--i:2">
+   <span class="tag plan">Out of current scope</span><b>Not part of the delivered workflow</b>
+   <ul class="bullets"><li>Database persistence across restarts</li><li>Secure or role-based authentication</li><li>Teacher management screens</li><li>PDF/report file export</li><li>Network or multi-user access</li></ul>
+  </div>
+ </div>
+ <p class="callout r" style="--i:3;margin-top:.9em">On launch, <code>DemoData</code> seeds 5 students, 3 courses, 6 marks records, and 6 attendance records for demonstration.</p>
+</section>
+
+<section class="s" data-key="features" data-presenter="Shifa" aria-label="Feature overview">
+ <h2 class="r"><small>04 &middot; Feature overview</small>What the application can do</h2>
+ <div class="grid g3">
+  <div class="glass r" style="--i:1"><span class="tag good">Implemented</span><b>Students</b><p>Add, update, delete, list, and search by numeric ID or name.</p></div>
+  <div class="glass r" style="--i:2"><span class="tag good">Implemented</span><b>Courses</b><p>Add, update, delete, list, and search by course name.</p></div>
+  <div class="glass r" style="--i:3"><span class="tag good">Implemented</span><b>Marks</b><p>Save or update internal/external marks; calculate total, percent, grade, and pass status.</p></div>
+  <div class="glass r" style="--i:4"><span class="tag good">Implemented</span><b>Attendance</b><p>Save or update classes attended; calculate percent and eligibility.</p></div>
+  <div class="glass r" style="--i:5"><span class="tag good">Implemented</span><b>Dashboard and reports</b><p>Show student/course counts, average attendance, and text summaries.</p></div>
+  <div class="glass r" style="--i:6"><span class="tag warn">Demo only</span><b>Login</b><p>A hard-coded demo check opens the dashboard; it is not secure authentication.</p></div>
+ </div>
+ <p class="note r" style="--i:7">Teacher exists as a model class only. There is no teacher CRUD panel or teacher service in the source.</p>
+</section>
+
+<section class="s" data-key="technology" data-presenter="Shifa" aria-label="Technology and project structure">
+ <h2 class="r"><small>05 &middot; Technology and structure</small>Small stack, clear packages</h2>
+ <div class="two">
+  <div class="grid g2 r" style="--i:1">
+   <div class="glass"><div class="label">Language</div><b>Java</b><p>Compiled here with JDK 21. Source uses Java 11+ features such as <code>var</code> and <code>String.repeat()</code>.</p></div>
+   <div class="glass"><div class="label">Desktop UI</div><b>Java Swing</b><p><code>JFrame</code>, <code>JPanel</code>, tables, forms, and event listeners.</p></div>
+   <div class="glass"><div class="label">Collections</div><b><code>ArrayList</code></b><p>Current repositories keep their records in static in-memory lists.</p></div>
+   <div class="glass"><div class="label">Build setup</div><b>Plain JDK</b><p>No Maven/Gradle file or third-party runtime library is present.</p></div>
+  </div>
+  <div class="code r" style="--i:2"><span class="code-label">Verified source tree</span>
+StudentManagementSystem/
+  src/
+    Main.java
+    data/       AppSession, DemoData
+    gui/        LoginFrame, DashboardFrame,
+                StudentPanel, CoursePanel,
+                MarksPanel, AttendancePanel,
+                ReportPanel
+    model/      Person, Student, Teacher,
+                Course, Marks, Attendance
+    repository/ *Repository + InMemory*
+    service/    Student, Course, Marks,
+                AttendanceService
+    util/       ValidationUtil
+    interface/  ReportGenerator.java
+  CheckSession.java
+  README.md</div>
+ </div>
+ <p class="note r" style="--i:3">The report interface declares package <code>interface_</code> because <code>interface</code> is a Java keyword.</p>
+</section>
+
+<section class="s motion-depth" data-key="architecture" data-presenter="Shifa" aria-label="System architecture">
+ <h2 class="r"><small>06 &middot; System architecture</small>Each layer has one main job</h2>
+ <div class="flow r" style="--i:1">
+  <div class="glass"><span class="tag">1 &middot; GUI</span><b>Swing panels</b><p>Collect input, show tables, and react to button events.</p></div>
+  <div class="arr">&rarr;</div>
+  <div class="glass"><span class="tag">2 &middot; Service</span><b>Business rules</b><p>Validate values and coordinate domain operations.</p></div>
+  <div class="arr">&rarr;</div>
+  <div class="glass"><span class="tag">3 &middot; Contract</span><b>Repository interface</b><p>Names the save/find/update/delete operations.</p></div>
+  <div class="arr">&rarr;</div>
+  <div class="glass"><span class="tag">4 &middot; Storage</span><b>In-memory repository</b><p>Implements the contract with an <code>ArrayList</code>.</p></div>
+ </div>
+ <div class="grid g2 r" style="--i:2;margin-top:.85em">
+  <div class="callout"><b>Concrete example</b> <code>StudentPanel &rarr; StudentService &rarr; StudentRepository &rarr; InMemoryStudentRepository.students</code></div>
+  <div class="callout"><b>Why separate layers?</b> A service can depend on the repository contract; another implementation can replace the list-backed class without rewriting the screen logic.</div>
+ </div>
+ <p class="note r" style="--i:3">The injected-repository constructors exist, but the normal <code>AppSession</code> path creates services with their no-argument constructors.</p>
+</section>
+
+<section class="s" data-key="workflow" data-presenter="Shifa" aria-label="Application workflow">
+ <h2 class="r"><small>07 &middot; Application workflow</small>From launch to a report</h2>
+ <div class="grid g4 r" style="--i:1">
+  <div class="glass step"><strong>01 &middot; LAUNCH</strong><b><code>Main.main()</code></b><p>Initialize demo services, then open <code>LoginFrame</code>.</p></div>
+  <div class="glass step"><strong>02 &middot; SIGN IN</strong><b>Demo login</b><p>Hard-coded comparison; not account security.</p></div>
+  <div class="glass step"><strong>03 &middot; OPEN</strong><b><code>DashboardFrame</code></b><p><code>CardLayout</code> switches the six main views.</p></div>
+  <div class="glass step"><strong>04 &middot; RECORD</strong><b>Students and courses</b><p>Maintain the people and course records used by later forms.</p></div>
+  <div class="glass step"><strong>05 &middot; CALCULATE</strong><b>Marks</b><p>Enter internal/external values and see the result.</p></div>
+  <div class="glass step"><strong>06 &middot; CHECK</strong><b>Attendance</b><p>Record classes and check the 75% threshold.</p></div>
+  <div class="glass step"><strong>07 &middot; REVIEW</strong><b>Reports</b><p>Generate text summaries from current in-memory records.</p></div>
+  <div class="glass step"><strong>ANY TIME</strong><b>Sidebar navigation</b><p>The panels can be opened in any order; this is a typical usage path.</p></div>
+ </div>
+</section>
+
+<section class="s" id="student-lifecycle" data-key="lifecycle" data-presenter="Sabeeh" aria-label="Student lifecycle">
+ <h2 class="r"><small>09 &middot; Student lifecycle</small>One form submission, end to end</h2>
+ <div class="flow r" style="--i:1">
+  <div class="glass"><b>Form input</b><p><code>StudentPanel</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Validate</b><p><code>validateForm()</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Build object</b><p><code>new Student(0, ...)</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Service</b><p><code>addStudent()</code></p></div>
+ </div>
+ <div class="flow r" style="--i:2;margin-top:.65em">
+  <div class="glass"><b>Repository contract</b><p><code>StudentRepository.save()</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Store</b><p>Assign ID, then add to <code>ArrayList</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Refresh</b><p><code>refreshTable()</code> reads <code>getAllStudents()</code></p></div>
+ </div>
+ <p class="callout r" style="--i:3;margin-top:.8em">The form starts with ID <code>0</code>; <code>InMemoryStudentRepository.save()</code> assigns <code>nextId</code> before storing the object.</p>
+</section>
+
+<section class="s motion-depth" data-key="class-diagram" data-presenter="Sabeeh" aria-label="Actual class diagram">
+ <h2 class="r"><small>10 &middot; Class diagram</small>Relationships visible in the source</h2>
+ <div class="diagram r" style="--i:1">
+  <section>
+   <h3>Model</h3>
+   <div class="classbox"><b>&lt;&lt;abstract&gt;&gt; Person</b><small>id, name, age, phone, email</small></div>
+   <div class="relation">Student and Teacher extend Person</div>
+   <div class="grid g2"><div class="classbox"><b>Student</b><small>studentId, department, semester...</small></div><div class="classbox"><b>Teacher</b><small>employeeId, department, designation</small></div></div>
+   <div class="grid g3"><div class="classbox"><b>Course</b><small>courseId, name...</small></div><div class="classbox"><b>Marks</b><small>studentId + courseId</small></div><div class="classbox"><b>Attendance</b><small>studentId + courseId</small></div></div>
+   <p class="note">Marks and Attendance store IDs, not direct Student/Course object references.</p>
+  </section>
+  <section>
+   <h3>Services and repositories</h3>
+   <div class="classbox"><b>StudentPanel</b> &rarr; <b>StudentService</b></div>
+   <div class="relation">uses StudentRepository</div>
+   <div class="classbox"><b>StudentRepository</b> &larr; implemented by <b>InMemoryStudentRepository</b></div>
+   <div class="classbox"><b>CoursePanel</b> &rarr; <b>CourseService</b> &rarr; CourseRepository</div>
+   <div class="classbox"><b>MarksPanel</b> &rarr; <b>MarksService</b> &rarr; MarksRepository</div>
+   <div class="classbox"><b>AttendancePanel</b> &rarr; <b>AttendanceService</b> &rarr; AttendanceRepository</div>
+   <p class="note">The other three in-memory repository classes implement their matching contracts.</p>
+  </section>
+  <section>
+   <h3>Reports</h3>
+   <div class="classbox"><b>ReportPanel</b> uses <b>ReportGenerator</b></div>
+   <div class="relation">implemented by three nested classes</div>
+   <div class="classbox"><b>StudentReportGenerator</b></div>
+   <div class="classbox"><b>MarksReportGenerator</b></div>
+   <div class="classbox"><b>AttendanceReportGenerator</b></div>
+   <p class="note">Overall Performance is built directly by <code>ReportPanel</code>, not by a fourth generator.</p>
+  </section>
+ </div>
+ <p class="note r" style="--i:2">Simplified diagram: arrow labels describe the actual inheritance, interface implementation, and service dependencies.</p>
+</section>
+
+<section class="s" data-key="classes-objects" data-presenter="Sabeeh" aria-label="Classes and objects">
+ <h2 class="r"><small>11 &middot; OOP foundation</small>A class is the plan; an object is one record</h2>
+ <div class="two">
+  <div class="r" style="--i:1">
+   <div class="glass"><div class="label">WHAT</div><b>Class and object</b><p>A class defines fields and behavior. An object is a created instance carrying values for those fields.</p></div>
+   <div class="glass" style="margin-top:.7em"><div class="label">WHERE / WHY</div><b><code>model.Student</code> and <code>DemoData</code></b><p><code>Student</code> models shared identity and academic fields. Each object is one student's state, passed to services and displayed in a table.</p></div>
+  </div>
+  <div class="r" style="--i:2">
+   <div class="code"><span class="code-label">StudentPanel.addStudent() &middot; source excerpt</span>
+Student student = <span class="kw">new</span> Student(
+    <span class="num">0</span>,
+    nameField.getText().trim(),
+    Integer.parseInt(ageField.getText()),
+    phoneField.getText().trim(),
+    emailField.getText().trim(),
+    studentIdField.getText().trim(),
+    deptField.getText().trim(),
+    Integer.parseInt(semesterField.getText()),
+    sectionField.getText().trim(),
+    Integer.parseInt(admissionField.getText())
+);</div>
+   <p class="note">The constructor creates one <code>Student</code> object; the repository later assigns its numeric database-style ID.</p>
+  </div>
+ </div>
+</section>
+
+<section class="s motion-depth" data-key="encapsulation" data-presenter="Sabeeh" aria-label="Encapsulation">
+ <h2 class="r"><small>12 &middot; OOP concept</small>Encapsulation keeps state behind a class API</h2>
+ <div class="two">
+  <div class="grid g2 r" style="--i:1">
+   <div class="glass"><div class="label">WHAT</div><p>Keep an object's fields private and expose deliberate methods to read or change them.</p></div>
+   <div class="glass"><div class="label">WHERE</div><p><code>Person</code>, <code>Student</code>, <code>Course</code>, <code>Marks</code>, and <code>Attendance</code> use private fields.</p></div>
+   <div class="glass"><div class="label">HOW</div><p><code>getName()</code> reads the name; <code>setName(String name)</code> updates it.</p></div>
+   <div class="glass"><div class="label">WHY</div><p>Callers use a stable API instead of directly depending on the storage layout.</p></div>
+  </div>
+  <div class="r" style="--i:2">
+   <div class="code"><span class="code-label">Person.java</span>
+<span class="kw">private</span> String name;
+
+<span class="kw">public</span> String getName() {
+    <span class="kw">return</span> name;
+}
+
+<span class="kw">public void</span> setName(String name) {
+    <span class="kw">this</span>.name = name;
+}</div>
+   <p class="note">The setters themselves are simple assignments; form and service validation happen elsewhere.</p>
+  </div>
+ </div>
+</section>
+
+<section class="s motion-depth" data-key="inheritance" data-presenter="Sabeeh" aria-label="Inheritance">
+ <h2 class="r"><small>13 &middot; OOP concept</small>Student and Teacher reuse Person</h2>
+ <div class="two">
+  <div class="grid g2 r" style="--i:1">
+   <div class="glass"><div class="label">WHAT</div><p>Inheritance lets a child class reuse and extend a parent class's behavior and data.</p></div>
+   <div class="glass"><div class="label">WHERE</div><p><code>Student extends Person</code> and <code>Teacher extends Person</code>.</p></div>
+   <div class="glass"><div class="label">HOW</div><p>Each child constructor calls <code>super(id, name, age, phone, email)</code>, then assigns its own fields.</p></div>
+   <div class="glass"><div class="label">WHY</div><p>Shared person details live once; student/employee details stay in their specific class.</p></div>
+  </div>
+  <div class="r" style="--i:2">
+   <div class="classbox" style="text-align:center;font-size:1em"><b>&lt;&lt;abstract&gt;&gt; Person</b><small>id &middot; name &middot; age &middot; phone &middot; email</small></div>
+   <div class="relation" style="font-size:1.2em">extends &darr;</div>
+   <div class="grid g2"><div class="classbox"><b>Student</b><small>studentId &middot; department &middot; semester &middot; section &middot; admissionYear</small></div><div class="classbox"><b>Teacher</b><small>employeeId &middot; department &middot; designation</small></div></div>
+   <div class="code" style="margin-top:.6em">Student(...) {
+    <span class="kw">super</span>(id, name, age, phone, email);
+    <span class="cm">// assign Student-specific fields</span>
+}</div>
+  </div>
+ </div>
+</section>
+
+<section class="s motion-depth" data-key="abstraction" data-presenter="Sahna" aria-label="Abstraction">
+ <h2 class="r"><small>14 &middot; OOP concept</small>Person defines the shared contract</h2>
+ <div class="two">
+  <div class="grid g2 r" style="--i:1">
+   <div class="glass"><div class="label">WHAT</div><p>Abstraction exposes the common idea while leaving type-specific details to concrete classes.</p></div>
+   <div class="glass"><div class="label">WHERE</div><p><code>public abstract class Person</code> and <code>displayDetails()</code>.</p></div>
+   <div class="glass"><div class="label">HOW</div><p><code>Person</code> cannot be instantiated directly. <code>Student</code> and <code>Teacher</code> provide the method body.</p></div>
+   <div class="glass"><div class="label">WHY</div><p>Both person types share identity fields while retaining their own details display.</p></div>
+  </div>
+  <div class="code r" style="--i:2"><span class="code-label">Person.java</span>
+<span class="kw">public abstract class</span> Person {
+    <span class="kw">private int</span> id;
+    <span class="kw">private</span> String name;
+
+    <span class="kw">public abstract void</span> displayDetails();
+}</div>
+ </div>
+ <p class="callout r" style="--i:3;margin-top:.8em">The method declarations exist in the source. The Swing screens do not currently call <code>displayDetails()</code>.</p>
+</section>
+
+<section class="s motion-depth" data-key="overloading" data-presenter="Sahna" aria-label="Overloading">
+ <h2 class="r"><small>15 &middot; Polymorphism A</small>Overloading: same name, different parameters</h2>
+ <div class="two">
+  <div class="r" style="--i:1">
+   <div class="glass"><div class="label">WHAT / WHY</div><p>Overloading gives related operations one readable name. The compiler chooses a signature from the argument types.</p></div>
+   <div class="glass" style="margin-top:.7em"><div class="label">WHERE / HOW</div><p><code>StudentService.searchStudent(int)</code> searches by numeric ID; <code>searchStudent(String)</code> searches by name.</p></div>
+   <div class="callout" style="margin-top:.7em">The ID/name branches in <code>StudentPanel.performSearch()</code> call the matching overload.</div>
+  </div>
+  <div class="r" style="--i:2">
+   <div class="code"><span class="code-label">StudentService.java</span>
+<span class="kw">public</span> List&lt;Student&gt; searchStudent(<span class="kw">int</span> studentId)
+<span class="kw">public</span> List&lt;Student&gt; searchStudent(String name)
+
+<span class="cm">// Actual call forms used by StudentPanel:</span>
+studentService.searchStudent(<span class="num">3</span>);
+studentService.searchStudent(<span class="str">"Amit"</span>);</div>
+   <div class="code" style="margin-top:.65em"><span class="code-label">Also in Marks.java</span>
+<span class="kw">public char</span> calculateGrade(<span class="kw">int</span> marks)
+<span class="kw">public char</span> calculateGrade(<span class="kw">double</span> percentage)</div>
+  </div>
+ </div>
+</section>
+
+<section class="s motion-depth" data-key="overriding" data-presenter="Sahna" aria-label="Overriding">
+ <h2 class="r"><small>16 &middot; Polymorphism B</small>Overriding: child supplies its own behavior</h2>
+ <div class="two">
+  <div class="grid g2 r" style="--i:1">
+   <div class="glass"><div class="label">WHAT</div><p>A subclass replaces an inherited method body while keeping the same signature.</p></div>
+   <div class="glass"><div class="label">WHERE</div><p><code>Student.displayDetails()</code> and <code>Teacher.displayDetails()</code> override the abstract method in <code>Person</code>.</p></div>
+   <div class="glass"><div class="label">HOW</div><p><code>@Override</code> asks the compiler to check the matching signature; runtime dispatch uses the object's class.</p></div>
+   <div class="glass"><div class="label">WHY</div><p>Shared parent-facing code can work with different person types without knowing each subtype's fields.</p></div>
+  </div>
+  <div class="r" style="--i:2">
+   <div class="code"><span class="code-label">Actual method signatures</span>
+<span class="kw">public abstract void</span> displayDetails(); <span class="cm">// Person</span>
+
+<span class="kw">@Override public void</span> displayDetails() { ... } <span class="cm">// Student</span>
+<span class="kw">@Override public void</span> displayDetails() { ... } <span class="cm">// Teacher</span></div>
+   <div class="code" style="margin-top:.65em"><span class="code-label">Valid dispatch example using DemoData values</span>
+Person p = <span class="kw">new</span> Student(<span class="num">1</span>, <span class="str">"Amit Kumar"</span>, <span class="num">20</span>,
+    <span class="str">"9876543210"</span>, <span class="str">"amit@example.com"</span>, <span class="str">"STU001"</span>,
+    <span class="str">"Computer Science"</span>, <span class="num">4</span>, <span class="str">"A"</span>, <span class="num">2022</span>);
+p.displayDetails();</div>
+   <p class="note">This valid dispatch example uses real project classes and demo values; the GUI does not invoke <code>displayDetails()</code>.</p>
+  </div>
+ </div>
+</section>
+
+<section class="s motion-depth" data-key="interfaces" data-presenter="Sahna" aria-label="Interfaces">
+ <h2 class="r"><small>17 &middot; OOP concept</small>Interfaces separate a promise from an implementation</h2>
+ <div class="grid g2 r" style="--i:1">
+  <div class="glass"><div class="label">WHAT</div><p>An interface declares operations that an implementing class must provide.</p></div>
+  <div class="glass"><div class="label">WHERE</div><p>Four repository contracts plus <code>interface_.ReportGenerator</code>.</p></div>
+  <div class="glass"><div class="label">HOW</div><p><code>InMemoryStudentRepository implements StudentRepository</code>; three nested report generators implement <code>ReportGenerator</code>.</p></div>
+  <div class="glass"><div class="label">WHY</div><p>Services can accept a repository contract; report types share a common generation API.</p></div>
+ </div>
+ <div class="two r" style="--i:2;margin-top:.75em">
+  <div class="code"><span class="code-label">StudentRepository.java</span>
+<span class="kw">public interface</span> StudentRepository {
+    <span class="kw">void</span> save(Student student);
+    Student findById(<span class="kw">int</span> id);
+    List&lt;Student&gt; findAll();
+    <span class="kw">void</span> update(Student student);
+    <span class="kw">void</span> delete(<span class="kw">int</span> id);
+}</div>
+  <div class="code"><span class="code-label">ReportGenerator.java</span>
+<span class="kw">public interface</span> ReportGenerator {
+    String generateReport(List&lt;?&gt; data);
+    String getReportTitle();
+}
+
+<span class="cm">// Implemented by three nested report classes
+// inside ReportPanel.</span></div>
+ </div>
+</section>
+
+<section class="s" data-key="java-details" data-presenter="Sahna" aria-label="Other Java OOP details">
+ <h2 class="r"><small>18 &middot; Java details</small>Constructors, access, static state, and value identity</h2>
+ <div class="grid g2 r" style="--i:1">
+  <div class="glass"><div class="label">Constructor overloading + injection</div><p><code>StudentService()</code> chooses <code>InMemoryStudentRepository</code>; <code>StudentService(StudentRepository)</code> accepts a dependency. <code>AppSession</code> uses the default constructor.</p></div>
+  <div class="glass"><div class="label">Access modifiers</div><p>Model state is <code>private</code>; getters/setters and service operations are <code>public</code>; helpers such as <code>validateMarks()</code> are <code>private</code>.</p></div>
+  <div class="glass"><div class="label">Static members</div><p><code>Marks.MAX_INTERNAL</code> and <code>Attendance.ELIGIBLE_PERCENTAGE</code> are constants. Repository lists and <code>AppSession</code> services are static.</p></div>
+  <div class="glass"><div class="label">Object relationships</div><p>Panels hold service references; services hold repository references. Marks and Attendance link records through student/course IDs.</p></div>
+ </div>
+ <div class="two r" style="--i:2;margin-top:.75em">
+  <div class="code"><span class="code-label">Course.java</span>
+<span class="kw">@Override public</span> String toString() { ... }
+<span class="kw">@Override public boolean</span> equals(Object o) { ... }
+<span class="kw">@Override public int</span> hashCode() {
+    <span class="kw">return</span> courseId.hashCode();
+}</div>
+  <div class="callout">Course equality uses <code>courseId</code>; its hash code uses the same key. <code>Person</code>, <code>Student</code>, and <code>Teacher</code> also override <code>toString()</code> with readable details.</div>
+ </div>
+</section>
+
+<section class="s" data-key="marks-calculations" data-presenter="Malavika" aria-label="Marks calculations">
+ <h2 class="r"><small>19 &middot; Business rules</small>Marks: total, percentage, grade, and pass status</h2>
+ <div class="two">
+  <div class="glass r" style="--i:1">
+   <span class="tag">Marks.java constants</span>
+   <table><thead><tr><th>Rule</th><th>Source value</th></tr></thead><tbody>
+    <tr><td>Internal maximum</td><td><code>MAX_INTERNAL = 40</code></td></tr>
+    <tr><td>External maximum</td><td><code>MAX_EXTERNAL = 60</code></td></tr>
+    <tr><td>Total maximum</td><td><code>MAX_TOTAL = 100</code></td></tr>
+    <tr><td>Pass threshold</td><td><code>PASS_MARKS = 40</code></td></tr>
+   </tbody></table>
+   <p class="note">Total = internal + external. Percentage = total / 100 &times; 100.</p>
+  </div>
+  <div class="glass r" style="--i:2">
+   <span class="tag">Grade bands in calculateGrade()</span>
+   <table><thead><tr><th>Grade</th><th>Total/percentage</th></tr></thead><tbody>
+    <tr><td>A</td><td>&ge; 90</td></tr><tr><td>B</td><td>80-89</td></tr>
+    <tr><td>C</td><td>70-79</td></tr><tr><td>D</td><td>60-69</td></tr>
+    <tr><td>E</td><td>50-59</td></tr><tr><td>F</td><td>&lt; 50</td></tr>
+   </tbody></table>
+   <p class="callout" style="margin-top:.55em">Pass and grade are separate: a total of 40 is <b>PASS</b> and grade <b>F</b>.</p>
+  </div>
+ </div>
+</section>
+
+<section class="s" data-key="attendance-calculation" data-presenter="Malavika" aria-label="Attendance calculation">
+ <h2 class="r"><small>20 &middot; Business rules</small>Attendance: percentage and 75% eligibility</h2>
+ <div class="two">
+  <div class="r" style="--i:1">
+   <div class="glass"><div class="label">Formula in Attendance.calculatePercentage()</div><b style="font-size:1.45em;color:var(--blue)">attendedClasses &divide; totalClasses &times; 100</b><p>For 15 of 20 classes: 15 &divide; 20 &times; 100 = 75%.</p></div>
+   <div class="glass" style="margin-top:.7em"><div class="label">Threshold</div><b><code>ELIGIBLE_PERCENTAGE = 75.0</code></b><p><code>isEligible()</code> returns true when percentage is greater than or equal to 75.</p></div>
+  </div>
+  <div class="grid g2 r" style="--i:2">
+   <div class="glass"><span class="tag good">75%</span><b>Eligible</b><p>15 / 20 classes</p></div>
+   <div class="glass"><span class="tag warn">70%</span><b>Not eligible</b><p>14 / 20 classes</p></div>
+   <div class="glass"><div class="label">Reject</div><p>Total classes must be above zero.</p></div>
+   <div class="glass"><div class="label">Reject</div><p>Attended cannot exceed total or be negative.</p></div>
+  </div>
+ </div>
+ <p class="note r" style="--i:3">The model throws <code>IllegalArgumentException</code> for invalid calculation inputs; the service also validates records before saving.</p>
+</section>
+
+<section class="s" data-key="validation" data-presenter="Sabeeh" aria-label="Validation and exceptions">
+ <h2 class="r"><small>21 &middot; Validation</small>Reject bad input before it reaches storage</h2>
+ <div class="two">
+  <div class="grid g2 r" style="--i:1">
+   <div class="glass"><div class="label">Reusable checks</div><p><code>ValidationUtil</code> checks email, 10-digit phone, age, IDs, credits, marks, and attendance ranges.</p></div>
+   <div class="glass"><div class="label">UI checks</div><p><code>StudentPanel.validateForm()</code> requires a name, numeric age, 10-digit phone, email format, and non-empty student ID.</p></div>
+   <div class="glass"><div class="label">Service checks</div><p><code>StudentService.addStudent()</code> rejects null, empty name, or age outside 15-60.</p></div>
+   <div class="glass"><div class="label">Error handling</div><p>Panels catch exceptions and show a Swing error dialog; model methods throw <code>IllegalArgumentException</code>.</p></div>
+  </div>
+  <div class="r" style="--i:2">
+   <div class="code"><span class="code-label">ValidationUtil.java</span>
+<span class="kw">private static final</span> Pattern PHONE_PATTERN =
+    Pattern.compile(<span class="str">"^[0-9]{10}$"</span>);
+
+<span class="kw">public static boolean</span> isValidPhone(String phone) {
+    <span class="kw">if</span> (!isNotEmpty(phone)) <span class="kw">return false</span>;
+    <span class="kw">return</span> PHONE_PATTERN.matcher(phone).matches();
+}</div>
+   <p class="callout" style="margin-top:.6em">Verified gap: the student form checks that its ID is non-empty, but does not call <code>isValidStudentId()</code>; the service also does not enforce ID format or student-ID uniqueness.</p>
+  </div>
+ </div>
+</section>
+
+<section class="s" data-key="code-walkthrough" data-presenter="Malavika" aria-label="Code walkthrough">
+ <h2 class="r"><small>22 &middot; Code walkthrough</small>Follow the Add button to the refreshed table</h2>
+ <div class="flow r" style="--i:1;margin-bottom:.75em">
+  <div class="glass"><b>Button event</b><p><code>e -&gt; addStudent()</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Validate + create</b><p><code>validateForm()</code> then <code>new Student(...)</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Service + repository</b><p>Business checks then <code>save()</code></p></div><div class="arr">&rarr;</div>
+  <div class="glass"><b>Refresh</b><p><code>getAllStudents()</code> repopulates JTable</p></div>
+ </div>
+ <div class="three r" style="--i:2">
+  <div class="code"><span class="code-label">StudentPanel.java</span>
+createButton(<span class="str">"Add"</span>,
+    e -&gt; addStudent());
+
+validateForm();
+Student student = <span class="kw">new</span> Student(
+    <span class="num">0</span>, nameField.getText().trim(),
+    Integer.parseInt(ageField.getText()),
+    phoneField.getText().trim(),
+    emailField.getText().trim(),
+    studentIdField.getText().trim(),
+    deptField.getText().trim(),
+    Integer.parseInt(semesterField.getText()),
+    sectionField.getText().trim(),
+    Integer.parseInt(admissionField.getText()));
+studentService.addStudent(student);
+clearForm();
+refreshTable();</div>
+  <div class="code"><span class="code-label">StudentService.java</span>
+<span class="kw">public void</span> addStudent(Student student) <span class="kw">throws</span> IllegalArgumentException {
+    <span class="cm">// null/name/age checks</span>
+    studentRepository.save(student);
+}</div>
+  <div class="code"><span class="code-label">InMemoryStudentRepository.java</span>
+<span class="kw">public void</span> save(Student student) {
+    <span class="kw">if</span> (student.getId() == <span class="num">0</span>)
+        student.setId(nextId++);
+    students.add(student);
+}</div>
+ </div>
+ <p class="note r" style="--i:3">The panel catches failures and displays an error dialog. On success, the table refresh reads a fresh list from the service.</p>
+</section>
+
+<section class="s" data-key="testing" data-presenter="Malavika" aria-label="Testing evidence">
+ <h2 class="r"><small>23 &middot; Testing evidence</small>Observed results from the compiled source</h2>
+ <table class="r" style="--i:1">
+  <thead><tr><th>Check</th><th>Expected</th><th>Observed</th><th>Result</th></tr></thead>
+  <tbody>
+   <tr><td>Compile 30 source files</td><td>All compile under the installed JDK</td><td>JDK 21 compile succeeded</td><td class="status pass">PASS</td></tr>
+   <tr><td><code>CheckSession</code> initialize twice</td><td>Demo count remains 5</td><td><code>initial=5</code>, <code>second_init=5</code></td><td class="status pass">PASS</td></tr>
+   <tr><td>Add one student, initialize again</td><td>Count becomes 6 and stays 6</td><td><code>after_add=6</code>, <code>after_reinit=6</code></td><td class="status pass">PASS</td></tr>
+   <tr><td>Marks at 40</td><td>Pass threshold is met</td><td>Total 40, grade F, <code>passed=true</code></td><td class="status observe">OBSERVED</td></tr>
+   <tr><td>Attendance boundary</td><td>75% eligible; below 75% not</td><td>15/20 eligible; 14/20 not eligible</td><td class="status pass">PASS</td></tr>
+   <tr><td>Invalid input</td><td>Bad phone, age, marks, attendance rejected</td><td>10-digit phone true / short false; age 14, internal 41, and 11/10 rejected</td><td class="status pass">PASS</td></tr>
+  </tbody>
+ </table>
+ <p class="note r" style="--i:2">Focused model/service checks were run temporarily against the source build. The repository has no JUnit suite; GUI screenshot navigation was exercised, but the Add form was not end-to-end tested.</p>
+</section>
+
+<section class="s" data-key="limitations" data-presenter="Malavika" aria-label="Current limitations">
+ <h2 class="r"><small>24 &middot; Current limitations</small>What the code does not yet provide</h2>
+ <div class="grid g2">
+  <div class="glass r" style="--i:1"><span class="tag warn">Storage</span><b>Session-only data</b><p>Repositories hold static <code>ArrayList</code> values; restarting the app loses user changes.</p></div>
+  <div class="glass r" style="--i:2"><span class="tag warn">Authentication</span><b>Demo login only</b><p>Credentials are hard-coded in <code>LoginFrame</code>; no secure account store or roles.</p></div>
+  <div class="glass r" style="--i:3"><span class="tag warn">Export</span><b>Not implemented</b><p>The Export button only shows a “coming soon” dialog.</p></div>
+  <div class="glass r" style="--i:4"><span class="tag warn">Report value</span><b>Overall report has a placeholder value</b><p>It prints total courses as hard-coded <code>0</code>; its “top performing” heading does not sort students.</p></div>
+  <div class="glass r" style="--i:5"><span class="tag warn">Teacher management</span><b>Model only</b><p><code>Teacher</code> exists, but no teacher panel, service, repository, or report exists.</p></div>
+  <div class="glass r" style="--i:6"><span class="tag warn">Validation</span><b>Some checks are not wired into forms</b><p>Student ID format/uniqueness are not enforced by the add flow.</p></div>
+ </div>
+</section>
+
+<section class="s" data-key="future" data-presenter="Malavika" aria-label="Future enhancements">
+ <h2 class="r"><small>25 &middot; Proposed next steps</small>Keep improvements separate from implemented features</h2>
+ <div class="grid g2">
+  <div class="glass r" style="--i:1"><span class="tag plan">Proposed</span><b>Database persistence</b><p>Implement repository contracts with a database-backed store and migrations.</p></div>
+  <div class="glass r" style="--i:2"><span class="tag plan">Proposed</span><b>Secure authentication</b><p>Store hashed passwords and add explicit roles and access rules.</p></div>
+  <div class="glass r" style="--i:3"><span class="tag plan">Proposed</span><b>Report export</b><p>Generate downloadable PDF or CSV reports and test the output.</p></div>
+  <div class="glass r" style="--i:4"><span class="tag plan">Proposed</span><b>Teacher management</b><p>Add teacher service/repository/panel workflows around the existing model.</p></div>
+  <div class="glass r" style="--i:5"><span class="tag plan">Proposed</span><b>Close data gaps</b><p>Enforce unique IDs, correct the overall report count/sort, and clarify grade/pass policy.</p></div>
+  <div class="glass r" style="--i:6"><span class="tag plan">Proposed</span><b>Automated tests</b><p>Add repeatable unit and GUI workflow tests for valid and invalid inputs.</p></div>
+ </div>
+</section>
+
+<section class="s" data-key="conclusion" data-presenter="Malavika" aria-label="Conclusion and questions" style="padding-top:7em">
+ <div class="eyebrow r" style="--i:0">Conclusion</div>
+ <h1 class="r" style="--i:1;font-size:3.7em">A working example<br>of Java OOP.</h1>
+ <p class="sub r" style="--i:2">Models, services, interfaces, Swing screens, and clear rules for marks and attendance.</p>
+ <p class="r" style="--i:3;margin-top:1.3em;font-size:1.2em;color:var(--blue);font-weight:700">Thank you. Questions?</p>
+ <p class="r" style="--i:4;margin-top:1.8em;font-size:.95em">Shifa (Roll No: 18) &middot; Sabeeh (Roll No: 84) &middot; Sahna (Roll No: 49) &middot; Malavika (Roll No: 30)</p>
+</section>
+
+<section class="s video-slide" data-key="video" data-presenter="Malavika" aria-label="Final project video">
+ <h2 class="video-intro"><small>Final video</small>Closing clip<span class="video-meta">endingvideo.mp4 &middot; 13 seconds</span></h2>
+ <div class="video-frame">
+  <video id="final-video" class="final-video" controls autoplay muted playsinline preload="metadata" aria-label="Project closing video">
+   <source src="screenshots/endingvideo.mp4" type="video/mp4">
+   Video playback is not supported by this browser.
+  </video>
+  <button class="video-play" id="video-play" type="button">Play video</button>
+  <button class="video-mute" id="video-mute" type="button" aria-pressed="true">Unmute</button>
+ </div>
+</section>
+
+<div id="dots" aria-label="Slide indicators"></div>
+<div id="counter" aria-live="polite"></div>
+<aside id="notes" role="note" aria-live="polite"><strong></strong><span></span></aside>
+<script type="application/json" id="screenshot-manifest">
+[
+ {"src":"screenshots/01-login.png","title":"Login","alt":"Java Swing login window with demo credentials redacted","detail":"Demo login is hard-coded; credential text is masked in this real capture.","presenter":"Shifa","seconds":22},
+ {"src":"screenshots/02-dashboard.png","title":"Dashboard","alt":"Live Java Swing dashboard with seeded student and course counts","detail":"The dashboard summarizes the seeded student and course records.","presenter":"Shifa","seconds":22},
+ {"src":"screenshots/03-students.png","title":"Student management","alt":"Live student management form and student table","detail":"Student fields and the table are shown as captured from the running application.","presenter":"Sabeeh","seconds":22},
+ {"src":"screenshots/04-courses.png","title":"Course management","alt":"Live course management form and course table","detail":"Course records are maintained through the dedicated Swing panel.","presenter":"Sabeeh","seconds":22},
+ {"src":"screenshots/05-marks.png","title":"Marks","alt":"Live marks entry form and seeded marks table","detail":"The panel displays internal and external marks and calculated results.","presenter":"Sahna","seconds":22},
+ {"src":"screenshots/06-attendance.png","title":"Attendance","alt":"Live attendance entry form and seeded attendance table","detail":"Attendance rows show classes attended and eligibility information.","presenter":"Sahna","seconds":22},
+ {"src":"screenshots/07-reports.png","title":"Reports","alt":"Live report generator panel","detail":"The report panel generates text summaries; export is not implemented.","presenter":"Sahna","seconds":22}
+]
+</script>
+</main>
+</div>
+<script>
+/* Legacy notes and navigation were replaced by the manifest-driven runtime below.
+const notes = [
+["Sabeeh","Welcome everyone and introduce all four members. This is a Java Swing desktop application built to apply OOP to academic records. Preview the flow from form input to in-memory storage."],
+["Sabeeh","Explain the problem in everyday terms: separate manual lists make duplicate entries and repeated calculations more likely. The project brings the common tasks into one operator workflow; it is a learning/demo system, not a deployed campus service."],
+["Malavika","Separate what is implemented from what is outside the current scope. Students and courses have management panels; marks, attendance, dashboard, and text reports are present. There is no persistence or student portal."],
+["Malavika","Walk around the six features and clarify the login is hard-coded demo authentication. Teacher is represented in the model but there is no teacher screen. Reports are generated as text; export is not implemented."],
+["Sahna","Describe the stack from the source tree. This is plain Java/Swing with JDK collections and no Maven/Gradle file. We compiled the 30 src files with JDK 21; source syntax requires Java 11 or newer."],
+["Sahna","Point across the four layers. The GUI gathers input, services enforce business rules, repository interfaces define storage operations, and in-memory classes use ArrayLists. Constructor injection is supported, while AppSession currently uses each service's default constructor."],
+["Shifa","Trace the typical path, but note the sidebar allows any screen in any order. The dashboard uses CardLayout. Reports read the current in-memory values, and the session's demo records make the first launch populated."],
+["Shifa","These are captures from the running Java application, not design mockups. The login credential text is redacted. Identify the real student/course tables, marks and attendance forms, and report screen."],
+["Sabeeh","Walk the student lifecycle left to right. The Add listener enters StudentPanel.addStudent; validation happens before construction; ID zero signals the repository to assign nextId; refreshTable pulls the updated service list."],
+["Malavika","Explain the three groups: the Person hierarchy and domain entities; service-to-repository dependencies; report panel and its three nested generator implementations. Marks and Attendance store IDs rather than direct object references."],
+["Malavika","A class defines fields and behavior; each Student object represents one record. Point to the new Student statement from StudentPanel and explain that the service receives the object and the repository stores it."],
+["Sahna","Encapsulation means callers use getters and setters rather than public fields. Person's name is private and read through getName. Be precise: setters are simple assignments here; validation is implemented in the form and service layers."],
+["Sahna","Person stores the common identity fields. Student and Teacher call the parent constructor with super, then initialize their own attributes. This removes duplicated name/contact fields."],
+["Shifa","Person is abstract and cannot be instantiated. Its abstract displayDetails method requires concrete subclasses to supply behavior. The method exists in Student and Teacher, although the current Swing flow does not call it."],
+["Shifa","Overloading uses the same method name with different parameter lists. StudentPanel selects the int or String search overload based on its search mode. Marks also overloads calculateGrade for int and double inputs."],
+["Sabeeh","Overriding keeps the method signature but changes the implementation in each child. Student and Teacher each define displayDetails. The Person-reference line is a teaching example, not a call currently wired into the interface."],
+["Sabeeh","StudentRepository and the other three repository interfaces state data operations. InMemoryStudentRepository implements one contract. ReportGenerator is implemented by three nested classes in ReportPanel; the overall report is direct panel logic."],
+["Malavika","Compare the two StudentService constructors: one chooses the in-memory repository, one accepts an interface dependency. Explain private/public boundaries, shared static storage, and Course's equality key. AppSession uses its static accessors to share services."],
+["Malavika","Internal marks are out of 40 and external out of 60. Grade bands are A through F, while pass is a separate total-at-least-40 check. This creates a real boundary case: 40 passes but receives F."],
+["Sahna","Attendance percentage is attended divided by total times 100. Exactly 75 qualifies. Zero total and impossible counts are invalid; both the model and service reject bad values."],
+["Sahna","ValidationUtil centralizes reusable checks, while panels validate before creating objects and services add business checks. Mention the verified gap: the student ID format helper exists but the add path only checks non-empty input."],
+["Shifa","Follow the actual button registration to addStudent. The panel validates, constructs Student, and calls the service. Service validates and invokes the repository interface; the implementation assigns an ID and appends to the list. The panel clears and refreshes."],
+["Shifa","These are observed checks from a JDK 21 source compile and temporary focused runs. CheckSession produced 5,5,6,6. Invalid marks, invalid attendance, and age 14 were rejected. There is no JUnit suite; the UI Add flow was not end-to-end tested."],
+["Sabeeh","Be candid about what is missing: data disappears on restart, demo login is not secure, export is a stub, teacher workflows are absent, and the overall report's course count is hard-coded zero."],
+["Malavika","Everything on this slide is proposed, not already implemented. Explain how database-backed repositories could fit the existing contracts, then mention secure auth, PDF export, teacher workflows, tests, and data-rule corrections."],
+["Sahna","Close with the main takeaway: the project links core OOP ideas to a working GUI and data flow, while exposing clear next improvements. Invite questions and hand off to the member best placed to answer."]
+];
+const slides = [...document.querySelectorAll(".s")];
+const dots = document.getElementById("dots");
+const notesPanel = document.getElementById("notes");
+const notesTitle = notesPanel.querySelector("strong");
+const notesText = notesPanel.querySelector("span");
+const counter = document.getElementById("counter");
+const orb = document.getElementById("orb");
+let current = 0;
+slides.forEach((slide,index) => {
+  const dot = document.createElement("button");
+  dot.type = "button";
+  dot.setAttribute("aria-label","Go to slide " + (index + 1));
+  dot.title = "Slide " + (index + 1);
+  dot.addEventListener("click",event => { event.stopPropagation(); go(index); });
+  dots.appendChild(dot);
+});
+function go(index) {
+  current = Math.max(0,Math.min(slides.length - 1,index));
+  slides.forEach((slide,i) => slide.classList.toggle("active",i === current));
+  [...dots.children].forEach((dot,i) => {
+    dot.classList.toggle("on",i === current);
+    dot.setAttribute("aria-current",i === current ? "step" : "false");
+  });
+  counter.textContent = String(current + 1).padStart(2,"0") + " / " + String(slides.length).padStart(2,"0");
+  orb.style.transform = "translate(" + ((current % 5) * 7 - 14) + "em," + ((current % 4) * 5 - 8) + "em)";
+  notesTitle.textContent = "Slide " + (current + 1) + " notes · " + notes[current][0];
+  notesText.textContent = notes[current][1];
+  history.replaceState(null,"","#" + (current + 1));
+}
+document.addEventListener("keydown",event => {
+  if (event.target && event.target.isContentEditable) return;
+  if (["ArrowRight"," ","PageDown"].includes(event.key)) { event.preventDefault(); go(current + 1); }
+  else if (["ArrowLeft","PageUp"].includes(event.key)) { event.preventDefault(); go(current - 1); }
+  else if (event.key === "Home") { event.preventDefault(); go(0); }
+  else if (event.key === "End") { event.preventDefault(); go(slides.length - 1); }
+  else if (event.key === "n" || event.key === "N") notesPanel.classList.toggle("show");
+  else if (event.key === "f" || event.key === "F") {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+  }
+});
+document.getElementById("deck").addEventListener("click",event => {
+  if (event.target.closest("#notes,#dots,button,a,[contenteditable='true']")) return;
+  go(event.clientX < window.innerWidth * .2 ? current - 1 : current + 1);
+});
+const requestedSlide = Number(location.hash.slice(1));
+go(requestedSlide > 0 ? requestedSlide - 1 : 0);
+*/
+</script>
+<script>
+// Browsers cannot enumerate a local directory from file://, so the inline manifest is populated by a recursive asset scan.
+const presenterOrder = ["Shifa","Sabeeh","Sahna","Malavika"];
+const presenterDetails = {
+  Shifa: { roll: 18, label: "Member 1" },
+  Sabeeh: { roll: 84, label: "Member 2" },
+  Sahna: { roll: 49, label: "Member 3" },
+  Malavika: { roll: 30, label: "Member 4" }
+};
+const noteData = {
+  title: { seconds: 25, text: "Introduce the project and the team in the requested order. It is a Java Swing learning application for academic records, not a deployed campus service." },
+  problem: { seconds: 30, text: "Explain the everyday problem: separate lists make duplicate data and repeated calculations more likely. The goal is one operator workflow with reusable Java classes." },
+  overview: { seconds: 35, text: "Distinguish what is implemented from what is outside scope. Student and course CRUD, marks, attendance, dashboard, and text reports exist; persistence, secure roles, and a student portal do not." },
+  features: { seconds: 35, text: "Walk the real feature set: students and courses, marks and grades, attendance eligibility, dashboard, and text summaries. Clarify that report export is not implemented." },
+  technology: { seconds: 35, text: "Name Java Swing, JDK collections, and plain source folders. There is no Maven or Gradle build; the source was verified with JDK 21 and uses Java 11-or-newer syntax." },
+  architecture: { seconds: 55, text: "Trace GUI to service to repository interface to in-memory ArrayList. Explain that service constructors accept interfaces for injection, though AppSession currently uses default constructors." },
+  workflow: { seconds: 40, text: "Describe the typical login-to-report path while noting that the sidebar can open panels in any order. DashboardFrame uses CardLayout and the demo session starts with seeded records." },
+  lifecycle: { seconds: 40, text: "Follow StudentPanel.addStudent: validate fields, construct Student, call StudentService, store through StudentRepository, assign an ID in the in-memory implementation, then refresh the table." },
+  "class-diagram": { seconds: 50, text: "Point out the Person inheritance, service-to-interface dependencies, repository implementations, and nested ReportGenerator classes. Marks and Attendance store IDs rather than object references." },
+  "classes-objects": { seconds: 30, text: "A class defines fields and behavior; each Student instance represents one record. The Add flow creates the object and passes it to a service and repository." },
+  encapsulation: { seconds: 45, text: "Private fields keep state behind getters and setters. Person's name is read through getName. Setters are simple assignments here; form and service layers do validation." },
+  inheritance: { seconds: 45, text: "Student and Teacher extend abstract Person. Their constructors call super for shared identity fields, then initialize child-specific state, avoiding duplicated common fields." },
+  validation: { seconds: 45, text: "ValidationUtil supplies reusable checks and forms validate before object creation. Note the verified gap: the add flow checks student ID is non-empty but does not enforce format or uniqueness." },
+  abstraction: { seconds: 40, text: "Person is abstract and cannot be instantiated. Its abstract displayDetails method requires concrete subclasses to define behavior; the current Swing workflow does not call it." },
+  overloading: { seconds: 45, text: "Overloading keeps a method name but changes its parameter list. StudentPanel calls searchStudent(int) or searchStudent(String); Marks has int and double calculateGrade overloads." },
+  overriding: { seconds: 45, text: "Student and Teacher override displayDetails with their own implementations. A Person reference can dispatch to the child implementation at runtime; this example is not currently wired to a button." },
+  interfaces: { seconds: 45, text: "StudentRepository and the other repository interfaces define storage operations; in-memory classes implement those contracts. Three nested report classes implement ReportGenerator; overall performance is direct panel logic." },
+  "java-details": { seconds: 50, text: "Compare the no-argument and injected StudentService constructors. Explain access modifiers, static shared repository lists, Course equality by courseId, and AppSession's static service accessors." },
+  "marks-calculations": { seconds: 45, text: "Internal marks are out of 40 and external out of 60. Grade bands run A to F; passing is separately total >= 40, so a total of 40 passes while receiving grade F." },
+  "attendance-calculation": { seconds: 45, text: "Attendance is attended divided by total times 100. Exactly 75 percent is eligible. Zero total and impossible counts are rejected by the model and service." },
+  "code-walkthrough": { seconds: 60, text: "Trace the registered Add event through validateForm, new Student, StudentService.addStudent, StudentRepository.save, ID assignment, clearForm, and refreshTable. The panel catches errors and shows a dialog." },
+  testing: { seconds: 45, text: "Report observed checks, not invented suite results: JDK 21 compilation, CheckSession counts 5/5/6/6, 75 percent boundary behavior, and invalid phone, age, marks, and attendance rejection. There is no JUnit suite or end-to-end Add test." },
+  limitations: { seconds: 35, text: "Be candid: static in-memory lists lose changes on restart; login is demo-only; export is a stub; Teacher has no management panel; overall report course count is hard-coded zero and its heading does not sort." },
+  future: { seconds: 35, text: "Everything here is proposed. Database persistence fits behind existing repository interfaces; secure authentication, PDF export, teacher workflows, automated tests, and corrected report rules are future work." },
+  conclusion: { seconds: 25, text: "Recap the link between OOP models, services, interfaces, Swing forms, and academic rules. Invite questions, then introduce the short closing video." },
+  video: { seconds: 10, text: "The discovered endingvideo.mp4 is about 13 seconds. It starts muted when this slide opens. Introduce it, let it play without talking over it, and use Play video if autoplay is blocked." }
+};
+
+const deck = document.getElementById("deck");
+const manifest = JSON.parse(document.getElementById("screenshot-manifest").textContent);
+const existingSlides = [...deck.querySelectorAll(".s")];
+const baseCounts = Object.fromEntries(presenterOrder.map(name => [name, existingSlides.filter(slide => slide.dataset.presenter === name).length]));
+const finalSlideCount = existingSlides.length + manifest.length + presenterOrder.length;
+const baseSectionSize = Math.floor(finalSlideCount / presenterOrder.length);
+const sectionRemainder = finalSlideCount % presenterOrder.length;
+const targetContentCounts = presenterOrder.map((_, index) => baseSectionSize + (index < sectionRemainder ? 1 : 0) - 1);
+const remainingSlots = Object.fromEntries(presenterOrder.map((name, index) => [name, targetContentCounts[index] - baseCounts[name]]));
+const screenshotAnchor = document.getElementById("student-lifecycle");
+
+manifest.forEach((asset, index) => {
+  const preferred = presenterOrder.includes(asset.presenter) ? asset.presenter : null;
+  const presenter = preferred && remainingSlots[preferred] > 0
+    ? preferred
+    : presenterOrder.reduce((best, name) => remainingSlots[name] > remainingSlots[best] ? name : best, presenterOrder[0]);
+  if (remainingSlots[presenter] < 1) throw new Error("Presenter slide allocation is full for " + asset.src);
+  remainingSlots[presenter] -= 1;
+
+  const slide = document.createElement("section");
+  slide.className = "s screenshot-slide";
+  slide.dataset.key = "screenshot-" + index;
+  slide.dataset.presenter = presenter;
+  slide.dataset.seconds = String(asset.seconds || 22);
+  slide.dataset.note = asset.detail;
+  slide.setAttribute("aria-label", "Application screenshot: " + asset.title);
+  const heading = document.createElement("h2");
+  heading.className = "r";
+  const eyebrow = document.createElement("small");
+  eyebrow.textContent = "Application screenshot";
+  heading.append(eyebrow, document.createTextNode(asset.title));
+  const frame = document.createElement("figure");
+  frame.className = "shot-frame r";
+  frame.style.setProperty("--i", "1");
+  const image = document.createElement("img");
+  image.className = "shot-image";
+  image.src = asset.src;
+  image.alt = asset.alt;
+  image.decoding = "async";
+  image.addEventListener("error", () => {
+    slide.classList.add("missing-asset");
+    image.alt = "Screenshot unavailable: " + asset.src;
+    const message = document.createElement("p");
+    message.textContent = "Screenshot unavailable: " + asset.src;
+    message.style.cssText = "padding:1em;color:#f3f9ff;font-size:1.2em";
+    frame.replaceChildren(message);
+  });
+  frame.appendChild(image);
+  const detail = document.createElement("p");
+  detail.className = "shot-note r";
+  detail.style.setProperty("--i", "2");
+  detail.textContent = asset.detail;
+  slide.append(heading, frame, detail);
+  screenshotAnchor.before(slide);
+});
+
+const groupedSlides = Object.fromEntries(presenterOrder.map(name => [name, []]));
+const allContentSlides = [...deck.querySelectorAll(".s")];
+allContentSlides.forEach(slide => {
+  const presenter = slide.dataset.presenter;
+  if (!groupedSlides[presenter]) throw new Error("Missing presenter assignment for " + (slide.dataset.key || slide.getAttribute("aria-label")));
+  groupedSlides[presenter].push(slide);
+});
+
+function makeDivider(name, sectionIndex, start, end) {
+  const profile = presenterDetails[name];
+  const slide = document.createElement("section");
+  slide.className = "s section-divider motion-section";
+  slide.dataset.key = "section-" + (sectionIndex + 1);
+  slide.dataset.presenter = name;
+  slide.dataset.seconds = "15";
+  slide.dataset.note = "Open this speaker's consecutive section, state the scope, and take the handoff. The assigned range is " + start + " through " + end + ".";
+  slide.setAttribute("aria-label", profile.label + " speaking section");
+  const kicker = document.createElement("div");
+  kicker.className = "section-number r";
+  kicker.style.setProperty("--i", "0");
+  kicker.textContent = profile.label + " / Section " + (sectionIndex + 1);
+  const heading = document.createElement("h2");
+  heading.className = "r";
+  heading.style.setProperty("--i", "1");
+  heading.textContent = name + "  |  Roll No: " + profile.roll;
+  const line = document.createElement("div");
+  line.className = "section-line r";
+  line.style.setProperty("--i", "2");
+  const range = document.createElement("p");
+  range.className = "range r";
+  range.style.setProperty("--i", "3");
+  range.textContent = "Slides " + String(start).padStart(2, "0") + "-" + String(end).padStart(2, "0") + " / " + finalSlideCount;
+  slide.append(kicker, heading, line, range);
+  return slide;
+}
+
+const orderedSlides = document.createDocumentFragment();
+let nextSlideNumber = 1;
+presenterOrder.forEach((presenter, index) => {
+  const content = groupedSlides[presenter];
+  const sectionSize = baseSectionSize + (index < sectionRemainder ? 1 : 0);
+  const start = nextSlideNumber;
+  const end = start + sectionSize - 1;
+  orderedSlides.appendChild(makeDivider(presenter, index, start, end));
+  content.forEach(slide => orderedSlides.appendChild(slide));
+  nextSlideNumber = end + 1;
+});
+allContentSlides.forEach(slide => slide.classList.remove("active"));
+deck.insertBefore(orderedSlides, document.getElementById("progress"));
+
+for (let i = 0; i < 18; i += 1) {
+  const particle = document.createElement("span");
+  particle.className = "particle";
+  particle.style.setProperty("--x", ((i * 47 + 11) % 97) + "%");
+  particle.style.setProperty("--y", ((i * 31 + 7) % 91) + "%");
+  particle.style.setProperty("--size", (i % 3 === 0 ? 5 : 3) + "px");
+  particle.style.setProperty("--duration", (11 + i % 9) + "s");
+  particle.style.setProperty("--delay", (-i % 8) + "s");
+  document.getElementById("particles").appendChild(particle);
+}
+
+const slides = [...deck.querySelectorAll(".s")];
+const dots = document.getElementById("dots");
+const notesPanel = document.getElementById("notes");
+const notesTitle = notesPanel.querySelector("strong");
+const notesText = notesPanel.querySelector("span");
+const counter = document.getElementById("counter");
+const progress = document.querySelector("#progress i");
+const progressBar = document.getElementById("progress");
+const orb = document.getElementById("orb");
+const video = document.getElementById("final-video");
+const playButton = document.getElementById("video-play");
+const muteButton = document.getElementById("video-mute");
+let current = 0;
+let pointerX = 0;
+let pointerY = 0;
+const motionClasses = ["motion-zoom","motion-left","motion-up","motion-depth","motion-section","motion-shot"];
+
+slides.forEach((slide, index) => {
+  const kicker = slide.querySelector("h2 small");
+  if (kicker && !slide.classList.contains("section-divider")) {
+    const label = kicker.textContent.replace(/^\d+\s*[·.]\s*/, "");
+    kicker.textContent = String(index + 1).padStart(2, "0") + " · " + label;
+  }
+  const label = slide.getAttribute("aria-label") || slide.dataset.key || "Presentation slide";
+  slide.setAttribute("aria-label", "Slide " + (index + 1) + ": " + label.replace(/^Slide \d+:\s*/, ""));
+  const dot = document.createElement("button");
+  dot.type = "button";
+  dot.setAttribute("aria-label", "Go to slide " + (index + 1) + ": " + slide.dataset.presenter);
+  dot.title = "Slide " + (index + 1) + " - " + slide.dataset.presenter;
+  dot.addEventListener("click", event => { event.stopPropagation(); go(index); });
+  dots.appendChild(dot);
+});
+progressBar.setAttribute("aria-valuemax", String(slides.length));
+
+function setVideoMute(isMuted) {
+  video.muted = isMuted;
+  muteButton.textContent = isMuted ? "Unmute" : "Mute";
+  muteButton.setAttribute("aria-pressed", String(isMuted));
+}
+function stopVideo() {
+  video.pause();
+  try { video.currentTime = 0; } catch (_) {}
+  setVideoMute(true);
+  playButton.hidden = false;
+  playButton.textContent = "Play video";
+}
+async function startVideo() {
+  try { video.currentTime = 0; } catch (_) {}
+  setVideoMute(true);
+  playButton.hidden = false;
+  playButton.textContent = "Play video";
+  try {
+    await video.play();
+    playButton.hidden = true;
+  } catch (_) {
+    playButton.hidden = false;
+  }
+}
+video.pause();
+video.addEventListener("playing", () => { playButton.hidden = true; });
+video.addEventListener("ended", () => { playButton.hidden = false; playButton.textContent = "Replay video"; });
+video.addEventListener("error", () => { playButton.hidden = false; playButton.textContent = "Retry video"; });
+video.addEventListener("volumechange", () => {
+  muteButton.textContent = video.muted ? "Unmute" : "Mute";
+  muteButton.setAttribute("aria-pressed", String(video.muted));
+});
+playButton.addEventListener("click", async event => {
+  event.stopPropagation();
+  try {
+    if (video.ended) video.currentTime = 0;
+    await video.play();
+    playButton.hidden = true;
+  } catch (_) {
+    playButton.hidden = false;
+  }
+});
+muteButton.addEventListener("click", event => {
+  event.stopPropagation();
+  setVideoMute(!video.muted);
+});
+
+function go(index) {
+  const next = Math.max(0, Math.min(slides.length - 1, index));
+  if (next === current && slides[current].classList.contains("active")) return;
+  const previous = current;
+  current = next;
+  if (slides[previous] && slides[previous].dataset.key === "video" && current !== previous) stopVideo();
+  slides.forEach((slide, i) => slide.classList.toggle("active", i === current));
+  const target = slides[current];
+  deck.classList.toggle("dark-slide", target.classList.contains("section-divider"));
+  const motion = target.classList.contains("section-divider") ? "motion-section"
+    : target.classList.contains("screenshot-slide") ? "motion-shot"
+    : target.classList.contains("motion-depth") ? "motion-depth"
+    : ["motion-zoom","motion-left","motion-up"][current % 3];
+  target.classList.remove(...motionClasses);
+  target.classList.add(motion);
+  [...dots.children].forEach((dot, i) => {
+    dot.classList.toggle("on", i === current);
+    dot.setAttribute("aria-current", i === current ? "step" : "false");
+  });
+  counter.textContent = String(current + 1).padStart(2, "0") + " / " + String(slides.length).padStart(2, "0");
+  progress.style.transform = "scaleX(" + ((current + 1) / slides.length) + ")";
+  progressBar.setAttribute("aria-valuenow", String(current + 1));
+  orb.style.transform = "translate(" + (((current % 5) * 4 - 8) + pointerX) + "em," + (((current % 4) * 3 - 5) + pointerY) + "em)";
+  const presenter = target.dataset.presenter;
+  const note = target.dataset.note || (noteData[target.dataset.key] && noteData[target.dataset.key].text) || "Introduce this slide and connect it to the prior section.";
+  notesTitle.textContent = "Slide " + (current + 1) + " / " + slides.length + " | Presenter: " + presenter + " (Roll No: " + presenterDetails[presenter].roll + ")";
+  notesText.textContent = note;
+  history.replaceState(null, "", "#" + (current + 1));
+  if (target.dataset.key === "video") startVideo();
+}
+
+document.addEventListener("keydown", event => {
+  const target = event.target;
+  if (event.key === "n" || event.key === "N") { notesPanel.classList.toggle("show"); return; }
+  if (event.key === "f" || event.key === "F") {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    return;
+  }
+  if (target && (target.isContentEditable || (typeof target.closest === "function" && target.closest("video,button,input,textarea,select")))) return;
+  if (["ArrowRight"," ","PageDown"].includes(event.key)) { event.preventDefault(); go(current + 1); }
+  else if (["ArrowLeft","PageUp"].includes(event.key)) { event.preventDefault(); go(current - 1); }
+  else if (event.key === "Home") { event.preventDefault(); go(0); }
+  else if (event.key === "End") { event.preventDefault(); go(slides.length - 1); }
+});
+deck.addEventListener("pointermove", event => {
+  if (event.pointerType === "touch") return;
+  const rect = deck.getBoundingClientRect();
+  pointerX = ((event.clientX - rect.left) / rect.width - .5) * .75;
+  pointerY = ((event.clientY - rect.top) / rect.height - .5) * .55;
+  orb.style.transform = "translate(" + (((current % 5) * 4 - 8) + pointerX) + "em," + (((current % 4) * 3 - 5) + pointerY) + "em)";
+});
+deck.addEventListener("click", event => {
+  if (event.target.closest("#notes,#dots,button,a,video,[controls],[contenteditable='true']")) return;
+  go(event.clientX < window.innerWidth * .2 ? current - 1 : current + 1);
+});
+
+const requestedSlide = Number(location.hash.slice(1));
+go(requestedSlide > 0 ? requestedSlide - 1 : 0);
+</script>
+</body>
+</html>
+
